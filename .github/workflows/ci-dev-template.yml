@@ -1,0 +1,33 @@
+name: DevOps Central Access Test
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  devops-bootstrap:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout application repo
+      - name: Checkout application repository
+        uses: actions/checkout@v4
+
+      # 2️⃣ Generate GitHub App installation token
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.ORG_APP_ID }}
+          private-key: ${{ secrets.ORG_APP_ID_PRIVATE_KEY }}
+
+      # 3️⃣ Clone DevOps central repo using the token
+      - name: Clone DevOps central repository
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          git clone --depth=1 --branch Feature-CB\
+            https://x-access-token:${GH_TOKEN}@github.com/aba-enterprise/enterprise-ci-templates.git
